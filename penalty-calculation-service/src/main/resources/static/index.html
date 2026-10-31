@@ -1,137 +1,298 @@
 <!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Расчет неустойки по этапу</title>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/report.css">
-  <link rel="stylesheet" href="/cats.css">
-  <script src="/report.js" defer></script>
-  <script src="/request-data.js" defer></script>
-  <script src="/json-editor.js" defer></script>
-  <script src="/cats.js" defer></script>
-  <script src="/test-data.js" defer></script>
-</head>
-<body>
-<main>
-  <form id="reports-form" novalidate>
-  <header class="report-heading">
-    <h1>Расчет неустойки по этапу</h1>
-    <label class="stage-number">№ этапа
-      <input id="stage-number" name="stageNumber" inputmode="numeric" pattern="[0-9]+" maxlength="2" placeholder="1–10" aria-label="Номер этапа — целое число от 1 до 10" required>
-    </label>
-  </header>
-  <div class="editor-modes" role="group" aria-label="Режим ввода">
-    <button id="form-mode" type="button" aria-pressed="true">Форма</button>
-    <button id="json-mode" type="button" aria-pressed="false">JSON</button>
-  </div>
-  <div id="form-editor">
-  <label class="contract-number">Номер договора
-    <span class="contract-input"><span>Г-00</span><input id="contract-number" name="contractNumber" inputmode="numeric" pattern="(0[1-9]|[1-7][0-9]|80)" maxlength="2" placeholder="01–80" aria-label="Номер договора от 01 до 80" required></span>
-  </label>
-  <fieldset class="calculation-inputs">
-    <legend>Данные для расчёта неустойки</legend>
-    <label>Сумма этапа, ₽
-      <input name="stageAmount" type="text" inputmode="decimal" placeholder="50 000 000.00" required>
-    </label>
-  </fieldset>
-  <fieldset class="submission-dates">
-    <legend>Дата подачи отчетности</legend>
-    <label>Плановая
-      <input name="reportPlannedSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
-    </label>
-    <label>Фактическая (поданы все три отчёта)
-      <input name="reportActualSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
-    </label>
-  </fieldset>
-  <div class="tabs" role="tablist" aria-label="Виды отчетов">
-    <button id="tab-grant" type="button" role="tab" data-report="grant" aria-selected="true" aria-controls="report-form">Грант</button>
-    <button id="tab-extra-budget" type="button" role="tab" data-report="extraBudget" aria-selected="false" aria-controls="extra-budget-report-form" tabindex="-1">Внебюджет</button>
-    <button id="tab-technical" type="button" role="tab" data-report="technical" aria-selected="false" aria-controls="technical-report-form" tabindex="-1">Тех</button>
-  </div>
-  <div id="report-panels">
-  <section id="report-form" role="tabpanel" aria-labelledby="tab-grant">
-    <div class="table-scroll" role="region" aria-label="Данные отчета" tabindex="0">
-      <table>
-        <colgroup>
-          <col style="width: 10%"><col style="width: 18%"><col style="width: 18%">
-          <col style="width: 18%"><col style="width: 16%"><col style="width: 20%">
-        </colgroup>
-        <thead>
-          <tr>
-            <th colspan="5" scope="colgroup">Отработка замечаний</th>
-            <th id="approval-date" rowspan="3" scope="col">Фактическая дата согласования отчета</th>
-          </tr>
-          <tr>
-            <th rowspan="2" scope="col">номер кейса</th>
-            <th id="returned-date" rowspan="2" scope="col">дата возврата на доработку</th>
-            <th colspan="2" scope="colgroup">дата подачи доработанного отчета</th>
-            <th id="remarks-corrected" rowspan="2" scope="col">Замечания исправлены</th>
-          </tr>
-          <tr>
-            <th scope="col">плановая</th>
-            <th id="revision-actual" scope="col">фактическая</th>
-          </tr>
-        </thead>
-        <tbody id="case-rows">
-          <tr>
-            <th class="case-cell case-number" scope="row"><input data-field="number" type="number" min="1" step="1" value="1" aria-label="Номер кейса" readonly><button class="remove-case" type="button" aria-label="Удалить строку кейса">Удалить</button></th>
-            <td class="case-cell actual"><input data-field="returnedForRevisionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" aria-labelledby="returned-date" required></td>
-            <td class="case-cell" data-planned-date title="Плановая дата рассчитывается по дате возврата и номеру кейса">— Заполнится после ввода даты возврата на доработку.</td>
-            <td class="case-cell actual"><input data-field="actualSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" aria-labelledby="revision-actual" required><small class="overdue-note" hidden></small></td>
-            <td class="case-cell actual"><input data-field="remarksCorrected" type="checkbox" aria-labelledby="remarks-corrected" checked></td>
-            <td class="shared actual"><input name="reportApprovalDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" aria-labelledby="approval-date" required></td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="5"><button id="add-case" class="add-case" type="button">+ Добавить кейс</button></td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <p class="case-hint">Номер следующего кейса увеличивается после исправления замечаний. При повторной доработке номер сохраняется.</p>
-    <div class="completion-dates" hidden>
-      <label>Плановая дата завершения работ
-        <input name="plannedCompletionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
-      </label>
-      <label>Фактическая дата завершения работ
-        <input name="actualCompletionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
-      </label>
-    </div>
-  </section>
-  </div>
-  <fieldset class="excluded-dates">
-    <legend>Даты, исключаемые из расчёта неустойки по несвоевременной первой сдаче отчета и несвоевременной доработке отчета</legend>
-    <div id="excluded-date-rows"></div>
-    <button id="add-excluded-date" type="button">+ Добавить дату</button>
-  </fieldset>
-  <template id="excluded-date-template">
-    <div class="excluded-date-row">
-      <input data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" aria-label="Исключаемая дата" required>
-      <button class="remove-excluded-date" type="button" aria-label="Удалить исключаемую дату">Удалить</button>
-    </div>
-  </template>
-  </div>
-  <div id="json-panel" hidden>
-    <label for="json-editor">Запрос на расчёт</label>
-    <p id="json-hint">Редактируйте запрос целиком. Даты — в формате дд.мм.гггг. Для переноса изменений переключитесь в форму.</p>
-    <textarea id="json-editor" rows="26" spellcheck="false" wrap="off" aria-describedby="json-hint"></textarea>
-  </div>
-    <div class="actions">
-      <label class="calculation-date" for="calculationDate">Дата расчёта
-        <input id="calculationDate" name="calculationDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
-      </label>
-      <button id="submit-report" type="submit">Рассчитать</button>
-      <button id="reset-form" type="reset">Очистить форму</button>
-      <button id="export-report" type="button">Скачать Excel</button>
-      <output id="result" role="status" aria-live="polite"></output>
-      <div id="test-case-buttons" aria-label="Тестовые примеры"></div>
-    </div>
-  </form>
-  <section id="calculation-result" aria-live="polite" hidden></section>
-</main>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Расчет неустойки по этапу</title>
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/report.css">
+    <link rel="stylesheet" href="/cats/cats.css">
+    <script src="/form-validation.js" defer></script>
+    <script src="/main.js" defer></script>
+    <script src="/report-output.js" defer></script>
+    <script src="/request-data.js" defer></script>
+    <script src="/import-export.js" defer></script>
+    <script src="/cats/cats.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <form id="reports-form" novalidate>
+        <header class="report-heading">
+          <h1>Расчет неустойки по этапу</h1>
+          <label class="stage-number">№ этапа
+            <input id="stage-number" name="stageNumber" inputmode="numeric" pattern="[0-9]+" maxlength="2" placeholder="1–10" required>
+          </label>
+        </header>
+
+        <!-- Импорт и экспорт данных -->
+        <div class="request-file-actions">
+          <button id="import-request-data" type="button" title="Загрузить исходные данные из файла">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V3m-5 5 5-5 5 5M4 15v6h16v-6"/></svg>
+            Импорт данных
+          </button>
+          <button id="export-request-data" type="button" title="Сохранить исходные данные в файл">
+            <svg class="button-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m-5-5 5 5 5-5M4 15v6h16v-6"/></svg>
+            Экспорт данных
+          </button>
+          <input id="request-data-file" type="file" accept=".json,application/json" hidden>
+        </div>
+        <p id="request-file-hint">Сохраните данные формы, чтобы загрузить их обратно и продолжить заполнение позже.</p>
+
+        <!-- Параметры этапа -->
+        <label class="contract-number">Номер договора
+          <span class="contract-input"><span>Г-00</span><input id="contract-number" name="contractNumber" inputmode="numeric" pattern="(0[1-9]|[1-7][0-9]|80)" maxlength="2" placeholder="01–80" required></span>
+        </label>
+        <fieldset class="calculation-inputs">
+          <legend>Данные для расчёта неустойки</legend>
+          <label>Сумма этапа, ₽
+            <input name="stageAmount" type="text" inputmode="decimal" placeholder="50 000 000.00" required>
+          </label>
+        </fieldset>
+        <fieldset class="report-submission-dates">
+          <legend>Дата подачи отчетности</legend>
+          <label>Плановая
+            <input name="reportPlannedSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
+          </label>
+          <label>Фактическая (поданы все три отчёта)
+            <input name="reportActualSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
+          </label>
+        </fieldset>
+
+        <!-- Отчёты -->
+        <div class="tabs">
+          <button id="tab-grant" type="button" data-report="grantReport" class="active">Грант</button>
+          <button id="tab-extra-budget" type="button" data-report="extraBudgetReport">Внебюджет</button>
+          <button id="tab-technical" type="button" data-report="technicalReport">Тех</button>
+        </div>
+        <div id="report-panels">
+          <section id="grant-report" data-report="grantReport">
+            <template data-form-template="report-fields-template"></template>
+          </section>
+          <section id="extra-budget-report" data-report="extraBudgetReport" hidden>
+            <template data-form-template="report-fields-template"></template>
+          </section>
+          <section id="technical-report" data-report="technicalReport" hidden>
+            <template data-form-template="report-fields-template"></template>
+            <p class="technical-report-exclusions-hint">Исключения дней просрочки подачи технического отчёта не применяются к просрочке выполнения работ этапа.</p>
+            <div class="completion-dates">
+              <label>Плановая дата завершения работ
+                <input name="plannedCompletionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
+              </label>
+              <label>Фактическая дата завершения работ
+                <input name="actualCompletionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
+              </label>
+            </div>
+          </section>
+        </div>
+        <template id="report-fields-template">
+          <div class="table-scroll">
+            <table>
+              <colgroup>
+                <col style="width: 10%"><col style="width: 18%"><col style="width: 18%">
+                <col style="width: 18%"><col style="width: 16%"><col style="width: 20%">
+              </colgroup>
+              <thead>
+                <tr>
+                  <th colspan="5" scope="colgroup">Отработка замечаний</th>
+                  <th rowspan="3" scope="col">Фактическая дата согласования отчета</th>
+                </tr>
+                <tr>
+                  <th rowspan="2" scope="col">номер кейса</th>
+                  <th rowspan="2" scope="col">дата возврата на доработку</th>
+                  <th colspan="2" scope="colgroup">дата подачи доработанного отчета</th>
+                  <th rowspan="2" scope="col">Замечания исправлены</th>
+                </tr>
+                <tr>
+                  <th scope="col">плановая</th>
+                  <th scope="col">фактическая</th>
+                </tr>
+              </thead>
+              <tbody data-form-field="cases">
+                <tr>
+                  <th class="case-cell case-number" scope="row"><input data-form-field="caseNumber" type="number" min="1" step="1" value="1" readonly><button class="remove-case" type="button">Удалить</button></th>
+                  <td class="case-cell actual"><input data-form-field="returnedForRevisionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required></td>
+                  <td class="case-cell" data-form-field="plannedSubmissionDate" title="Плановая дата рассчитывается по дате возврата и номеру кейса">— Заполнится после ввода даты возврата на доработку.</td>
+                  <td class="case-cell actual"><input data-form-field="actualSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required><small class="long-case-note" hidden></small></td>
+                  <td class="case-cell actual"><input data-form-field="remarksCorrected" type="checkbox" checked></td>
+                  <td class="shared actual" rowspan="0"><input name="reportApprovalDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required></td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5"><button class="add-case" type="button">+ Добавить кейс</button></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <p class="case-hint">Номер следующего кейса увеличивается после исправления замечаний. При повторной доработке номер сохраняется.</p>
+
+          <!-- Исключаемые дни доработки отчёта -->
+          <fieldset class="days-to-exclude">
+            <legend>Даты, исключаемые из просрочки по этому отчёту</legend>
+            <div class="days-to-exclude-list"></div>
+            <div class="day-ranges-to-exclude-list"></div>
+            <div class="days-to-exclude-actions">
+              <button class="add-day-to-exclude" type="button">+ Добавить дату</button>
+              <button class="add-day-range-to-exclude" type="button">+ Добавить интервал</button>
+            </div>
+            <p class="days-to-exclude-hint">Исключения применяются только к просрочке по этому отчёту. Границы интервала включаются в исключаемые дни.</p>
+          </fieldset>
+
+          <template data-form-case-template>
+            <tr>
+              <th class="case-cell case-number" scope="row"><input data-form-field="caseNumber" type="number" min="1" step="1" value="1" readonly><button class="remove-case" type="button">Удалить</button></th>
+              <td class="case-cell actual"><input data-form-field="returnedForRevisionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required></td>
+              <td class="case-cell" data-form-field="plannedSubmissionDate" title="Плановая дата рассчитывается по дате возврата и номеру кейса">— Заполнится после ввода даты возврата на доработку.</td>
+              <td class="case-cell actual"><input data-form-field="actualSubmissionDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required><small class="long-case-note" hidden></small></td>
+              <td class="case-cell actual"><input data-form-field="remarksCorrected" type="checkbox" checked></td>
+            </tr>
+          </template>
+        </template>
+
+        <template id="day-to-exclude-template">
+          <div class="day-to-exclude-row">
+            <input name="days" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
+            <button class="remove-day-to-exclude" type="button">Удалить</button>
+          </div>
+        </template>
+        <template id="day-range-to-exclude-template">
+          <div class="day-range-to-exclude-row">
+            <label>С <input name="startDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required></label>
+            <label>По <input name="endDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required></label>
+            <button class="remove-day-range-to-exclude" type="button">Удалить</button>
+          </div>
+        </template>
+
+        <!-- Панель действий -->
+        <div class="actions">
+          <label class="calculation-date" for="calculation-date">Дата расчёта
+            <input id="calculation-date" name="calculationDate" data-date inputmode="numeric" placeholder="дд.мм.гггг" maxlength="10" required>
+          </label>
+          <button id="submit-report" type="submit">Рассчитать</button>
+          <button id="reset-form" type="reset">Очистить форму</button>
+          <button id="export-report" type="button">Скачать расчёт</button>
+          <output id="result"></output>
+        </div>
+      </form>
+
+      <!-- Результат расчёта -->
+      <section id="calculation-result" hidden>
+        <h2>Расчёт по договору <span data-result-field="contractNumber"></span>, этап <span data-result-field="stageNumber"></span></h2>
+        <p>Дата расчёта: <span data-result-field="calculationDate"></span>. Сумма этапа: <span data-result-field="stageAmount"></span>. Ключевая ставка ЦБ: <span data-result-field="keyRatePercent"></span> на дату расчёта.</p>
+
+        <section class="penalty-stage" data-stage="reportingDelayPenalty">
+          <h3>1. Несвоевременное предоставление отчетности</h3>
+          <h4>Первая сдача отчётности</h4>
+          <div class="overdue-days" data-initial-submission-days>
+            <p><strong>Дни просрочки (<span data-result-field="initialSubmissionDaysForCalculation.length"></span>): </strong><span data-result-field="initialSubmissionDaysForCalculation"></span></p>
+          </div>
+
+          <!-- Доработка отчётов -->
+          <h4>Доработка отчётов</h4>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr><th scope="col">Отчёт</th><th scope="col">Дни просрочки</th></tr>
+              </thead>
+              <tbody data-report-rows>
+                <tr data-result-report="grantReport">
+                  <td data-result-report-name>Грант</td>
+                  <td>
+                    <div class="overdue-days" data-calculation-days>
+                      <p data-result-exclusion-details hidden><strong>Исходные дни просрочки (<span data-result-field="overdueDays.length"></span>): </strong><span data-result-field="overdueDays"></span></p>
+                      <p data-result-exclusion-details hidden><strong>Исключены вручную (<span data-result-field="daysToExclude.length"></span>): </strong><span data-result-field="daysToExclude"></span></p>
+                      <p><strong>Дни просрочки (<span data-result-field="daysForCalculation.length"></span>): </strong><span data-result-field="daysForCalculation"></span></p>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-result-report="extraBudgetReport">
+                  <td data-result-report-name>Внебюджет</td>
+                  <td>
+                    <div class="overdue-days" data-calculation-days>
+                      <p data-result-exclusion-details hidden><strong>Исходные дни просрочки (<span data-result-field="overdueDays.length"></span>): </strong><span data-result-field="overdueDays"></span></p>
+                      <p data-result-exclusion-details hidden><strong>Исключены вручную (<span data-result-field="daysToExclude.length"></span>): </strong><span data-result-field="daysToExclude"></span></p>
+                      <p><strong>Дни просрочки (<span data-result-field="daysForCalculation.length"></span>): </strong><span data-result-field="daysForCalculation"></span></p>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-result-report="technicalReport">
+                  <td data-result-report-name>Технический отчёт</td>
+                  <td>
+                    <div class="overdue-days" data-calculation-days>
+                      <p data-result-exclusion-details hidden><strong>Исходные дни просрочки (<span data-result-field="overdueDays.length"></span>): </strong><span data-result-field="overdueDays"></span></p>
+                      <p data-result-exclusion-details hidden><strong>Исключены вручную (<span data-result-field="daysToExclude.length"></span>): </strong><span data-result-field="daysToExclude"></span></p>
+                      <p><strong>Дни просрочки (<span data-result-field="daysForCalculation.length"></span>): </strong><span data-result-field="daysForCalculation"></span></p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Неустойка по доработке рассчитывается по уникальным дням просрочки всех трёх отчётов. Если одна дата встречается в нескольких отчётах, она учитывается один раз.</p>
+          <details>
+            <summary>Проверить сроки и исправление замечаний по кейсам</summary>
+            <p>Неисправленные попытки подряд продолжают один кейс с прежним номером и исходной плановой датой. Просрочка длится до подачи исправленного отчёта, включая промежутки между попытками; внутри одного отчёта повторяющиеся дни учитываются один раз.</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Отчёт</th><th scope="col">Кейс</th><th scope="col">Возврат</th>
+                    <th scope="col">Плановая подача</th><th scope="col">Фактическая подача</th>
+                    <th scope="col">Замечания</th><th scope="col">Расчёт просрочки</th>
+                  </tr>
+                </thead>
+                <tbody data-case-rows></tbody>
+              </table>
+            </div>
+          </details>
+          <h4>Итого по отчётности</h4>
+          <div class="overdue-days" data-reporting-delay-total-days>
+            <p data-result-exclusion-details hidden><strong>Исходные дни просрочки (<span data-result-field="totalOverdueDays.length"></span>): </strong><span data-result-field="totalOverdueDays"></span></p>
+            <p data-result-exclusion-details hidden><strong>Исключены вручную (<span data-result-field="totalDaysToExclude.length"></span>): </strong><span data-result-field="totalDaysToExclude"></span></p>
+            <p><strong>Дни просрочки (<span data-result-field="totalDaysForCalculation.length"></span>): </strong><span data-result-field="totalDaysForCalculation"></span></p>
+          </div>
+          <p class="section-penalty">Неустойка за несвоевременное предоставление отчетности: <span data-reporting-delay-formula><span data-result-field="stageAmount"></span> × <span data-result-field="keyRatePercent"></span> / 100 × <span data-result-field="totalDaysForCalculation.length"></span> / 300 = <span data-result-field="penalty"></span></span></p>
+        </section>
+
+        <!-- Завершение работ -->
+        <section class="penalty-stage" data-stage="stageCompletionPenalty">
+          <h3>2. Недостижение результатов этапа реализации проекта</h3>
+          <div class="overdue-days" data-calculation-days>
+            <p><strong>Дни просрочки (<span data-result-field="overdueDays.length"></span>): </strong><span data-result-field="overdueDays"></span></p>
+          </div>
+          <p class="section-penalty">Неустойка за недостижение результатов этапа реализации проекта: <span data-stage-completion-formula><span data-result-field="stageAmount"></span> × <span data-result-field="keyRatePercent"></span> / 100 × <span data-result-field="overdueDays.length"></span> / 300 = <span data-result-field="penalty"></span></span></p>
+        </section>
+
+        <!-- Итог -->
+        <section class="penalty-stage">
+          <h3 id="calculation-summary-heading">3. Итог</h3>
+          <div class="calculation-summary">
+            <p class="total-days">Всего дней просрочки: <span data-result-field="totalDaysForCalculation.length"></span>.</p>
+            <p>Формула каждого раздела: сумма этапа × ключевая ставка ЦБ / 100 × дни просрочки раздела / 300. Неустойка каждого раздела округляется вверх до копейки, затем суммы складываются.</p>
+            <p class="penalty-total">Итоговая неустойка: <span data-result-field="reportingDelayPenalty.penalty"></span> + <span data-result-field="stageCompletionPenalty.penalty"></span> = <span data-result-field="totalPenalty"></span></p>
+          </div>
+        </section>
+      </section>
+      <template id="result-case-template">
+        <tr>
+          <td data-result-field="name"></td>
+          <td data-result-field="caseNumber"></td>
+          <td data-result-field="returnedForRevisionDate"></td>
+          <td data-result-field="plannedSubmissionDate"></td>
+          <td data-result-field="actualSubmissionDate"></td>
+          <td><span data-result-remarks-corrected="true" hidden>Исправлены</span><span data-result-remarks-corrected="false" hidden>Возобновляется фиксация нарушения срока.</span></td>
+          <td>
+            <div class="overdue-days" data-calculation-days>
+              <p data-result-exclusion-details hidden><strong>Исходные дни просрочки (<span data-result-field="overdueDays.length"></span>): </strong><span data-result-field="overdueDays"></span></p>
+              <p data-result-exclusion-details hidden><strong>Исключены вручную (<span data-result-field="daysToExclude.length"></span>): </strong><span data-result-field="daysToExclude"></span></p>
+              <p><strong>Дни просрочки (<span data-result-field="daysForCalculation.length"></span>): </strong><span data-result-field="daysForCalculation"></span></p>
+            </div>
+          </td>
+        </tr>
+      </template>
+    </main>
+    <a id="calculation-download" hidden></a>
+    <a id="request-data-download" hidden></a>
+  </body>
 </html>

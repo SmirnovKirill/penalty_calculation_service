@@ -1,5 +1,6 @@
 {
-  "stageNumber": 1,
+  "formatVersion": 1,
+  "stageNumber": 3,
   "calculationDate": "02.12.2025",
   "contractNumber": "Г-0014",
   "stageAmount": "37793453.05",
@@ -28,7 +29,11 @@
         "actualSubmissionDate": "18.11.2025",
         "remarksCorrected": true
       }
-    ]
+    ],
+    "daysToExclude": {
+      "days": [],
+      "dayRanges": []
+    }
   },
   "extraBudgetReport": {
     "reportApprovalDate": "01.12.2025",
@@ -53,7 +58,11 @@
         "actualSubmissionDate": "18.11.2025",
         "remarksCorrected": true
       }
-    ]
+    ],
+    "daysToExclude": {
+      "days": [],
+      "dayRanges": []
+    }
   },
   "technicalReport": {
     "reportApprovalDate": "28.11.2025",
@@ -75,7 +84,10 @@
         "actualSubmissionDate": "24.11.2025",
         "remarksCorrected": true
       }
-    ]
-  },
-  "daysToExcludeManually": []
+    ],
+    "daysToExclude": {
+      "days": [],
+      "dayRanges": []
+    }
+  }
 }

@@ -10,43 +10,49 @@ h1 { margin: 0 0 24px; text-align: center; font-size: 21px; }
 .report-heading h1 { margin: 0; }
 .stage-number { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .stage-number input { width: 80px; border-color: var(--border); background: var(--blue); }
-.contract-number, .submission-dates label, .completion-dates label, .calculation-inputs label { display: grid; gap: 6px; width: 260px; }
+.contract-number, .report-submission-dates label, .completion-dates label, .calculation-inputs label { display: grid; gap: 6px; width: 260px; }
 .contract-number { margin-bottom: 20px; }
 .contract-input { display: flex; align-items: center; gap: 4px; }
 .contract-input input { flex: 1; }
-.submission-dates, .calculation-inputs { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 20px; padding: 12px; border: 1px solid var(--border); }
-.excluded-dates { margin: 28px 0 20px; padding: 12px; border: 1px solid var(--border); }
-.excluded-dates p { margin: 0 0 12px; }
-.excluded-date-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.excluded-date-row input { width: 180px; border-color: var(--border); background: var(--blue); }
-.submission-dates legend, .calculation-inputs legend { padding: 0 6px; }
+.report-submission-dates, .calculation-inputs { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 20px; padding: 12px; border: 1px solid var(--border); }
+.days-to-exclude { margin: 28px 0 20px; padding: 12px; border: 1px solid var(--border); }
+.days-to-exclude p { margin: 0 0 12px; }
+.day-to-exclude-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.day-to-exclude-row input { width: 180px; border-color: var(--border); background: var(--blue); }
+.day-range-to-exclude-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.day-range-to-exclude-row label { display: flex; align-items: center; gap: 6px; }
+.day-range-to-exclude-row input { width: 180px; border-color: var(--border); background: var(--blue); }
+.days-to-exclude-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.days-to-exclude .days-to-exclude-hint { margin: 8px 0 0; }
+.report-submission-dates legend, .calculation-inputs legend { padding: 0 6px; }
 .calculation-inputs label { width: 340px; align-content: start; }
 .calculation-inputs small { line-height: 1.4; }
 .completion-dates { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 20px; }
 .completion-dates[hidden] { display: none; }
-.editor-modes { display: flex; gap: 4px; margin-bottom: 20px; }
-.editor-modes [aria-pressed="true"] { font-weight: bold; background: var(--green); }
-#json-panel > label { font-weight: bold; }
-#json-editor { box-sizing: border-box; width: 100%; min-height: 55vh; padding: 12px; border: 1px solid var(--border); background: #f4f8fb; font: 13px/1.5 monospace; resize: vertical; }
+.request-file-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.request-file-actions button { display: inline-flex; align-items: center; gap: 8px; }
+.button-icon { width: 18px; height: 18px; flex: none; }
+#request-file-hint { margin: 8px 0 20px; color: #465769; }
 .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
 .tabs button { border-bottom: 0; background: #edf2f6; }
-.tabs [aria-selected="true"] { background: var(--blue); font-weight: bold; box-shadow: inset 0 -3px var(--green); }
+.tabs .active { background: var(--blue); font-weight: bold; box-shadow: inset 0 -3px var(--green); }
+#report-panels { padding: 12px; border: 1px solid var(--border); }
 .table-scroll { overflow-x: auto; }
 table { width: 100%; min-width: 900px; table-layout: fixed; border-collapse: collapse; background: var(--blue); }
 th, td { padding: 6px; border: 1px solid var(--border); text-align: center; vertical-align: middle; }
 thead th { padding: 12px 7px; }
 tbody tr { height: 56px; }
 .actual { background: var(--green); }
-#report-panels .overdue-warning { background: #fff3cd; }
-.overdue-note { display: block; margin-top: 4px; color: #775000; font: 12px/1.4 Arial, sans-serif; }
-.overdue-note[hidden] { display: none; }
+#report-panels .long-case-warning { background: #fff3cd; }
+.long-case-note { display: block; margin-top: 4px; color: #775000; font: 12px/1.4 Arial, sans-serif; }
+.long-case-note[hidden] { display: none; }
 input, button { box-sizing: border-box; font: inherit; color: inherit; }
 input { width: 100%; min-width: 0; padding: 7px 2px; border: 1px solid transparent; border-radius: 0; background: transparent; text-align: center; }
 input::placeholder { color: #465769; opacity: 1; }
 input:hover { border-color: #687e8b; }
 input:focus { outline: 2px solid #345e80; outline-offset: -2px; background: #ffffff70; }
-.contract-number input, .submission-dates input, .completion-dates input, .calculation-inputs input { border-color: var(--border); background: var(--blue); }
-.submission-dates label:last-child input,
+.contract-number input, .report-submission-dates input, .completion-dates input, .calculation-inputs input { border-color: var(--border); background: var(--blue); }
+.report-submission-dates label:last-child input,
 .completion-dates label:last-child input { background: var(--green); }
 input[type="checkbox"] { width: 18px; height: 18px; padding: 0; accent-color: #345e80; cursor: pointer; }
 input:invalid { outline: 2px solid #b3261e; outline-offset: -2px; }
@@ -61,21 +67,21 @@ button:disabled { opacity: .6; cursor: wait; }
 .calculation-date { display: grid; gap: 4px; width: 160px; }
 .calculation-date input { border-color: var(--border); background: var(--blue); }
 .actions output { flex: 1; min-width: 180px; align-self: center; }
-#test-case-buttons { display: flex; gap: 8px; margin-left: auto; }
 output { overflow-wrap: anywhere; }
 #calculation-result { margin-top: 28px; }
 #calculation-result h2 { margin: 0 0 12px; font-size: 20px; }
 #calculation-result h3 { margin: 0 0 12px; font-size: 17px; }
+#calculation-result h4 { margin: 20px 0 12px; font-size: 15px; }
 #calculation-result .penalty-stage { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
 #calculation-result .penalty-total { font-size: 18px; font-weight: bold; }
+#calculation-result .section-penalty { font-size: 18px; font-weight: bold; }
 #calculation-result .overdue-days { line-height: 1.6; overflow-wrap: anywhere; }
 #calculation-result .overdue-days p { margin: 6px 0; }
-#calculation-result .calculation-summary { margin-top: 28px; padding: 16px 20px; border: 1px solid #c7d3db; border-left: 4px solid #8095a4; border-radius: 6px; background: #f4f8fb; }
+#calculation-result .calculation-summary { padding: 16px 20px; border: 1px solid #c7d3db; border-left: 4px solid #8095a4; border-radius: 6px; background: #f4f8fb; }
 #calculation-result .total-days { margin: 0 0 12px; font-size: 18px; font-weight: bold; }
 #calculation-result .calculation-summary .penalty-total { margin-bottom: 0; }
 #calculation-result table { min-width: 680px; background: #f4f8fb; }
 #calculation-result th:first-child { width: 24%; }
-#calculation-result td { white-space: pre-line; }
 #calculation-result tfoot { background: var(--green); font-weight: bold; }
 #calculation-result details { margin-top: 16px; }
 #calculation-result summary { margin-bottom: 12px; cursor: pointer; }

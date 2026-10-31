@@ -1,0 +1,275 @@
+config:
+  validation: true
+  warningsAsErrors: false
+  checkExhaustiveness: false
+processors:
+  active: true
+console-reports:
+  active: true
+  exclude:
+  - ProjectStatisticsReport
+  - ComplexityReport
+  - NotificationReport
+  - IssuesReport
+  - FileBasedIssuesReport
+comments:
+  active: true
+  DeprecatedBlockTag:
+    active: true
+complexity:
+  active: true
+  ComplexCondition:
+    active: true
+    allowedConditions: 8
+  CognitiveComplexMethod:
+    active: true
+  LargeClass:
+    active: true
+    allowedLines: 700
+    excludes:
+      - '**/src/test/**'
+  LongMethod:
+    active: false
+    allowedLines: 80
+  LongParameterList:
+    active: false
+  NestedBlockDepth:
+    active: true
+  TooManyFunctions:
+    active: false
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false
+  TooGenericExceptionThrown:
+    active: true
+    exceptionNames:
+    - Error
+    - Exception
+    - RuntimeException
+    - Throwable
+ktlint:
+  active: true
+  autoCorrect: true
+  indentStyle: 'space'
+  AnnotationOnSeparateLine:
+    indentSize: 2
+  ArgumentListWrapping:
+    active: true
+    indentSize: 2
+    maxLineLength: 150
+  BinaryExpressionWrapping:
+    indentSize: 2
+  ChainMethodContinuation:
+    indentSize: 2
+  ChainWrapping:
+    active: true
+    indentSize: 2
+  ClassSignature:
+    active: false
+    indentSize: 2
+  CommentWrapping:
+    indentSize: 2
+  ConditionWrapping:
+    indentSize: 2
+  ContextReceiverListWrapping:
+    indentSize: 2
+  ContextReceiverMapping:
+    indentSize: 2
+  EnumWrapping:
+    active: true
+    indentSize: 2
+  ExpressionOperandWrapping:
+    indentSize: 2
+  FinalNewline:
+    active: true
+    insertFinalNewLine: true
+  FunctionExpressionBody:
+    indentSize: 2
+  FunctionLiteral:
+    active: true
+    indentSize: 2
+    maxLineLength: 150
+  FunctionSignature:
+    active: true
+    indentSize: 2
+    maxLineLength: 150
+  IfElseBracing:
+    indentSize: 2
+  IfElseWrapping:
+    indentSize: 2
+  ImportOrdering:
+    active: true
+    layout: '*'
+  Indentation:
+    active: true
+    indentSize: 2
+  KdocWrapping:
+    indentSize: 2
+  ModifierListSpacing:
+    indentSize: 2
+  MultiLineIfElse:
+    indentSize: 2
+  MultilineExpressionWrapping:
+    active: false
+    indentSize: 2
+  MultilineLoop:
+    indentSize: 2
+  NoEmptyFirstLineInClassBody:
+    indentSize: 2
+  NoLineBreakBeforeAssignment:
+    active: true
+  NoMultipleSpaces:
+    active: true
+  NoSingleLineBlockComment:
+    indentSize: 2
+  NoWildcardImports:
+    active: true
+    packagesToUseImportOnDemandProperty: ''
+  PackageName:
+    excludes:
+    - '**/ru/inno_sc/**'
+  ParameterListWrapping:
+    active: true
+    indentSize: 2
+    maxLineLength: 150
+  ParameterWrapping:
+    active: true
+    indentSize: 2
+    maxLineLength: 150
+  PropertyWrapping:
+    indentSize: 2
+  SpacingAroundCurly:
+    indentSize: 2
+  SpacingAroundDot:
+    active: true
+  StatementWrapping:
+    indentSize: 2
+  StringTemplateIndent:
+    indentSize: 2
+  MaximumLineLength:
+    active: true
+    maxLineLength: 150
+  TrailingCommaOnCallSite:
+    active: false
+  TrailingCommaOnDeclarationSite:
+    active: false
+  TryCatchFinallySpacing:
+    indentSize: 2
+  TypeArgumentListSpacing:
+    indentSize: 2
+  TypeParameterListSpacing:
+    indentSize: 2
+  WhenEntryBracing:
+    indentSize: 2
+  Wrapping:
+    indentSize: 2
+style:
+  active: true
+  BracesOnIfStatements:
+    active: true
+    singleLine: never
+    multiLine: always
+  DataClassShouldBeImmutable:
+    active: true
+  UnusedImport:
+    active: true
+  ForbiddenImport:
+    active: true
+    forbiddenImports:
+    - value: sun.*
+    - value: javax.annotation(?!\\.processing).*
+    - value: javax.ejb.*
+    - value: javax.el.*
+    - value: javax.mail.*
+    - value: javax.persistence.*
+    - value: javax.security.auth.message.*
+    - value: javax.servlet.*
+    - value: javax.transaction(?!.xa).*
+    - value: javax.websocket.*
+    - value: javax.activation.*
+    - value: javax.batch.*
+    - value: javax.decorator.*
+    - value: javax.enterprise.*
+    - value: javax.faces.*
+    - value: javax.jms.*
+    - value: javax.json.*
+    - value: javax.jws.*
+    - value: javax.interceptor.*
+    - value: javax.inject(?!\\.Inject$).*
+    - value: javax.management.j2ee.*
+    - value: javax.resource.*
+    - value: javax.security.auth.enterprise.*
+    - value: javax.security.auth.jacc.*
+    - value: javax.validation.*
+    - value: javax.ws.rs.*
+    - value: javax.xml.bind.*
+    - value: javax.xml.soap.*
+    - value: javax.xml.ws.*
+    - value: java.util.Currency
+  FunctionOnlyReturningConstant:
+    active: true
+    ignoreOverridableFunction: true
+    ignoreActualFunction: true
+    excludedFunctions: []
+  LoopWithTooManyJumpStatements:
+    active: true
+    maxJumpCount: 1
+  MagicNumber:
+    active: true
+    excludes:
+    - '**/test/**'
+    - '**/androidTest/**'
+    - '**/commonTest/**'
+    - '**/jvmTest/**'
+    - '**/androidUnitTest/**'
+    - '**/androidInstrumentedTest/**'
+    - '**/jsTest/**'
+    - '**/iosTest/**'
+    - '**/*.kts'
+    ignoreNumbers:
+    - '-1'
+    - '0'
+    - '1'
+    - '2'
+    - '3'
+    - '5'
+    - '21'
+    - '30'
+    - '100'
+    - '200'
+    - '400'
+    - '599'
+    - '1000'
+    ignoreHashCodeFunction: true
+    ignorePropertyDeclaration: false
+    ignoreLocalVariableDeclaration: false
+    ignoreConstantDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: false
+    ignoreNamedArgument: true
+    ignoreEnums: false
+    ignoreRanges: false
+    ignoreExtensionFunctions: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 150
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
+    excludeRawStrings: true
+  ThrowsCount:
+    active: true
+    max: 10
+    excludeGuardClauses: false
+  WildcardImport:
+    active: true
+    excludeImports:
+    - java.util.*
+  ReturnCount:
+    active: true
+    max: 3
+    excludeGuardClauses: true
+naming:
+  PackageNaming:
+    packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*|ru\.inno_sc(\.[a-z][A-Za-z0-9]*)*'

@@ -1,0 +1,113 @@
+{
+  "formatVersion": 1,
+  "stageNumber": 1,
+  "contractNumber": "Г-0070",
+  "stageAmount": "187500000",
+  "reportPlannedSubmissionDate": "20.12.2025",
+  "reportActualSubmissionDate": "20.12.2025",
+  "grantReport": {
+    "cases": [
+      {
+        "returnedForRevisionDate": "25.12.2025",
+        "actualSubmissionDate": "30.12.2025",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "13.02.2026",
+        "actualSubmissionDate": "18.02.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "16.03.2026",
+        "actualSubmissionDate": "18.03.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "01.04.2026",
+        "actualSubmissionDate": "03.04.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "03.04.2026",
+        "actualSubmissionDate": "03.04.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "26.05.2026",
+        "actualSubmissionDate": "29.05.2026",
+        "remarksCorrected": true
+      }
+    ],
+    "reportApprovalDate": "19.08.2026",
+    "daysToExclude": {
+      "days": [],
+      "dayRanges": []
+    }
+  },
+  "extraBudgetReport": {
+    "cases": [
+      {
+        "returnedForRevisionDate": "25.12.2025",
+        "actualSubmissionDate": "30.12.2025",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "13.02.2026",
+        "actualSubmissionDate": "18.02.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "16.03.2026",
+        "actualSubmissionDate": "18.03.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "26.05.2026",
+        "actualSubmissionDate": "29.05.2026",
+        "remarksCorrected": true
+      }
+    ],
+    "reportApprovalDate": "19.08.2026",
+    "daysToExclude": {
+      "days": [],
+      "dayRanges": []
+    }
+  },
+  "technicalReport": {
+    "cases": [
+      {
+        "returnedForRevisionDate": "02.03.2026",
+        "actualSubmissionDate": "05.03.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "13.05.2026",
+        "actualSubmissionDate": "18.05.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "01.07.2026",
+        "actualSubmissionDate": "06.07.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "21.07.2026",
+        "actualSubmissionDate": "23.07.2026",
+        "remarksCorrected": true
+      },
+      {
+        "returnedForRevisionDate": "24.07.2026",
+        "actualSubmissionDate": "24.07.2026",
+        "remarksCorrected": true
+      }
+    ],
+    "reportApprovalDate": "19.08.2026",
+    "plannedCompletionDate": "20.12.2025",
+    "actualCompletionDate": "20.12.2025",
+    "daysToExclude": {
+      "days": [],
+      "dayRanges": []
+    }
+  },
+  "calculationDate": "28.08.2026"
+}
