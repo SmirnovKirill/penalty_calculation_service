@@ -4,14 +4,15 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 data class CalculatePenaltyRequestDto(
-    val stageNumber: Int,
-    val contractNumber: String,
-    val stageAmount: BigDecimal,
-    val calculationDate: LocalDate,
-    val reportPlannedSubmissionDate: LocalDate,
-    val reportActualSubmissionDate: LocalDate,
-    val grantReport: GrantReportDto,
-    val extraBudgetReport: ExtraBudgetReportDto,
-    val technicalReport: TechnicalReportDto,
-    val daysToExcludeManually: List<LocalDate> = emptyList(),
+  val formatVersion: Int = 1,
+  val stageNumber: Int,
+  val contractNumber: String,
+  val stageAmount: BigDecimal,
+  val calculationDate: LocalDate,
+  val reportPlannedSubmissionDate: LocalDate,
+  val reportActualSubmissionDate: LocalDate,
+  val grantReport: GrantReportDto,
+  val extraBudgetReport: ExtraBudgetReportDto,
+  val technicalReport: TechnicalReportDto,
+  val daysToExcludeManually: DaysToExcludeManuallyDto,
 )

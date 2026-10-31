@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class ReportExceptionHandler {
-    @ExceptionHandler(IllegalArgumentException::class)
-    fun illegalArgument(error: IllegalArgumentException): ProblemDetail =
-        ProblemDetail.forStatusAndDetail(BAD_REQUEST, error.message)
+  @ExceptionHandler(IllegalArgumentException::class)
+  fun illegalArgument(error: IllegalArgumentException): ProblemDetail = ProblemDetail.forStatusAndDetail(BAD_REQUEST, error.message)
 }

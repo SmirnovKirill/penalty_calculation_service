@@ -1,5 +1,5 @@
 {
-  "stageNumber": 1,
+  "stageNumber": 3,
   "calculationDate": "02.12.2025",
   "contractNumber": "Г-0014",
   "stageAmount": "37793453.05",
@@ -77,5 +77,8 @@
       }
     ]
   },
-  "daysToExcludeManually": []
+  "daysToExcludeManually": {
+    "days": [],
+    "dayRanges": []
+  }
 }

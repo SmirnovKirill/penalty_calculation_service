@@ -132,5 +132,8 @@
       }
     ]
   },
-  "daysToExcludeManually": []
+  "daysToExcludeManually": {
+    "days": [],
+    "dayRanges": []
+  }
 }

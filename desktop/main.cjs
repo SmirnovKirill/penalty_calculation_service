@@ -100,7 +100,13 @@ async function stop() {
   try {
     await once(backend, 'exit', { signal: AbortSignal.timeout(5000) });
   } catch {
-    backend.kill('SIGKILL');
+    // Portable-оболочка удаляет временную папку после выхода Electron, поэтому ждём завершения Java.
+    // Подписываемся на exit до kill, чтобы не пропустить быстрое завершение процесса.
+    if (backend.exitCode === null && backend.signalCode === null) {
+      const exited = once(backend, 'exit');
+      backend.kill('SIGKILL');
+      await exited;
+    }
   }
 }
 
