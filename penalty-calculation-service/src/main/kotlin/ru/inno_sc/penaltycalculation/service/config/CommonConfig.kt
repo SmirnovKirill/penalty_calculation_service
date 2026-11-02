@@ -26,8 +26,12 @@ class CommonConfig {
     .addDeserializer(LocalDate::class.java, LocalDateDeserializer(DATE_FORMATTER))
 
   companion object {
+    const val CATALOG_DIRECTORY = "catalog"
+    const val MIN_SUPPORTED_YEAR = 2022
+    const val MAX_SUPPORTED_YEAR = 2050
     const val DATE_PATTERN = "dd.MM.uuuu"
     val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern(DATE_PATTERN).withResolverStyle(STRICT)
-    val MIN_SUPPORTED_DATE: LocalDate = LocalDate.of(2022, 1, 1)
+    val MIN_SUPPORTED_DATE: LocalDate = LocalDate.of(MIN_SUPPORTED_YEAR, 1, 1)
+    val MAX_SUPPORTED_DATE: LocalDate = LocalDate.of(MAX_SUPPORTED_YEAR, 12, 31)
   }
 }

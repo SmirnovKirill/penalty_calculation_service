@@ -41,8 +41,7 @@ function checkRequestData(data) {
   if (data.formatVersion !== 1) throw Error('formatVersion: поддерживается только версия 1.');
   if ('stageNumber' in data && data.stageNumber !== null && (!Number.isInteger(data.stageNumber) || data.stageNumber < 1 || data.stageNumber > 10)) throw Error('stageNumber: укажите номер этапа целым числом от 1 до 10.');
   if ('contractNumber' in data && (typeof data.contractNumber !== 'string' || !/^Г-00\d{0,2}$/.test(data.contractNumber))) throw Error('contractNumber: ожидается номер с префиксом Г-00 и двумя цифрами.');
-  if ('stageAmount' in data && !['string', 'number'].includes(typeof data.stageAmount)) throw Error('stageAmount: ожидается сумма строкой или числом.');
-  if (typeof data.stageAmount === 'number' && Math.abs(data.stageAmount) > Number.MAX_SAFE_INTEGER) throw Error('stageAmount: передайте большую сумму строкой для сохранения точности.');
+  if ('stageAmount' in data && typeof data.stageAmount !== 'string') throw Error('stageAmount: передайте сумму строкой для сохранения точности.');
   if ('stageAmount' in data && !/^\d*([.,]\d{0,2})?$/.test(String(data.stageAmount))) throw Error('stageAmount: укажите только цифры и до двух знаков после запятой.');
   checkDateFields(data, 'Запрос', ['reportPlannedSubmissionDate', 'reportActualSubmissionDate']);
   for (const reportName of reports) {

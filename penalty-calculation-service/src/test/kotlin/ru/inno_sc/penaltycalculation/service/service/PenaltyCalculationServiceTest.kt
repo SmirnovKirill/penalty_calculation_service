@@ -4,8 +4,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.CsvSource
 import org.springframework.beans.factory.annotation.Autowired
 import ru.inno_sc.penaltycalculation.api.penalty.request.CalculatePenaltyRequestDto
 import ru.inno_sc.penaltycalculation.api.penalty.request.DayRangeDto
@@ -15,7 +13,7 @@ import ru.inno_sc.penaltycalculation.api.penalty.request.GrantReportDto
 import ru.inno_sc.penaltycalculation.api.penalty.request.ReportCaseDto
 import ru.inno_sc.penaltycalculation.api.penalty.request.TechnicalReportDto
 import ru.inno_sc.penaltycalculation.service.AbstractTest
-import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_FORMATTER
+import ru.inno_sc.penaltycalculation.service.AbstractTest.Companion.date
 
 class PenaltyCalculationServiceTest : AbstractTest() {
   @Autowired
@@ -253,7 +251,7 @@ class PenaltyCalculationServiceTest : AbstractTest() {
     assertEquals(days("06.03.2026", "07.03.2026"), reporting.extraBudgetReport.daysForCalculation)
     assertEquals(emptyList<LocalDate>(), reporting.totalDaysToExclude)
     assertEquals(days("06.03.2026", "07.03.2026"), reporting.totalDaysForCalculation)
-    assertEquals(BigDecimal("93.34"), reporting.penalty)
+    assertEquals(BigDecimal("93.33"), reporting.penalty)
   }
 
   @Test
@@ -321,7 +319,7 @@ class PenaltyCalculationServiceTest : AbstractTest() {
     assertEquals(days("06.03.2026", "07.03.2026", "08.03.2026", "09.03.2026", "10.03.2026"), reporting.totalOverdueDays)
     assertEquals(emptyList<LocalDate>(), reporting.totalDaysToExclude)
     assertEquals(days("06.03.2026", "07.03.2026", "08.03.2026", "09.03.2026", "10.03.2026"), reporting.totalDaysForCalculation)
-    assertEquals(BigDecimal("233.34"), reporting.penalty)
+    assertEquals(BigDecimal("233.33"), reporting.penalty)
   }
 
   @Test
@@ -431,38 +429,35 @@ class PenaltyCalculationServiceTest : AbstractTest() {
       ),
       result.totalDaysForCalculation
     )
-    assertEquals(BigDecimal("93.34"), result.reportingDelayPenalty.penalty)
+    assertEquals(BigDecimal("93.33"), result.reportingDelayPenalty.penalty)
     assertEquals(BigDecimal("420.00"), result.stageCompletionPenalty.penalty)
-    assertEquals(BigDecimal("513.34"), result.totalPenalty)
+    assertEquals(BigDecimal("513.33"), result.totalPenalty)
   }
 
-  // Для 1 рубля прежнее округление всех 3 дней давало 0.01, два раздела дают 0.01 + 0.01 = 0.02.
-  @ParameterizedTest
-  @CsvSource("1,0.01,0.01,0.02", "10.71,0.01,0.01,0.02", "100000,93.34,46.67,140.01")
-  fun `reporting and completion are rounded separately before summing`(
-    amount: String,
-    reportingPenalty: String,
-    completionPenalty: String,
-    totalPenalty: String,
-  ) {
-    val case = case("06.03.2026", "13.03.2026")
-    val request = request().copy(
-      stageAmount = BigDecimal(amount),
-      reportPlannedSubmissionDate = date("04.03.2026"),
-      reportActualSubmissionDate = date("05.03.2026"),
+  @Test
+  fun `reporting and completion are rounded up separately before summing`() {
+    val case = case("04.03.2026", "04.03.2026")
+    val request = CalculatePenaltyRequestDto(
+      formatVersion = 1,
+      stageNumber = 1,
+      contractNumber = "Г-0001",
+      stageAmount = BigDecimal("225"),
+      calculationDate = date("28.10.2026"),
+      reportPlannedSubmissionDate = date("02.03.2026"),
+      reportActualSubmissionDate = date("03.03.2026"),
       grantReport = GrantReportDto(
         cases = listOf(case),
-        reportApprovalDate = date("13.03.2026"),
+        reportApprovalDate = date("04.03.2026"),
         daysToExclude = DaysToExcludeDto(),
       ),
       extraBudgetReport = ExtraBudgetReportDto(
         cases = listOf(case),
-        reportApprovalDate = date("13.03.2026"),
+        reportApprovalDate = date("04.03.2026"),
         daysToExclude = DaysToExcludeDto(),
       ),
       technicalReport = TechnicalReportDto(
         cases = listOf(case),
-        reportApprovalDate = date("13.03.2026"),
+        reportApprovalDate = date("04.03.2026"),
         plannedCompletionDate = date("02.03.2026"),
         actualCompletionDate = date("03.03.2026"),
         daysToExclude = DaysToExcludeDto(),
@@ -471,16 +466,54 @@ class PenaltyCalculationServiceTest : AbstractTest() {
 
     val result = service.calculate(request)
 
-    assertEquals(days("05.03.2026"), result.reportingDelayPenalty.initialSubmissionDaysForCalculation)
-    assertEquals(days("13.03.2026"), result.reportingDelayPenalty.grantReport.daysForCalculation)
-    assertEquals(days("13.03.2026"), result.reportingDelayPenalty.extraBudgetReport.daysForCalculation)
-    assertEquals(days("13.03.2026"), result.reportingDelayPenalty.technicalReport.daysForCalculation)
-    assertEquals(days("05.03.2026", "13.03.2026"), result.reportingDelayPenalty.totalDaysForCalculation)
-    assertEquals(days("03.03.2026"), result.stageCompletionPenalty.overdueDays)
-    assertEquals(days("05.03.2026", "13.03.2026", "03.03.2026"), result.totalDaysForCalculation)
-    assertEquals(BigDecimal(reportingPenalty), result.reportingDelayPenalty.penalty)
-    assertEquals(BigDecimal(completionPenalty), result.stageCompletionPenalty.penalty)
-    assertEquals(BigDecimal(totalPenalty), result.totalPenalty)
+    assertEquals(1, result.reportingDelayPenalty.totalDaysForCalculation.size)
+    assertEquals(1, result.stageCompletionPenalty.overdueDays.size)
+    // Каждый раздел: 225 × 14 / 100 / 300 = 0.105 → 0.11 рубля.
+    assertEquals(BigDecimal("0.11"), result.reportingDelayPenalty.penalty)
+    assertEquals(BigDecimal("0.11"), result.stageCompletionPenalty.penalty)
+    // Складываем округлённые суммы: 0.11 + 0.11 = 0.22, а не 0.21.
+    assertEquals(BigDecimal("0.22"), result.totalPenalty)
+  }
+
+  @Test
+  fun `reporting and completion are rounded down separately before summing`() {
+    val case = case("04.03.2026", "04.03.2026")
+    val request = CalculatePenaltyRequestDto(
+      formatVersion = 1,
+      stageNumber = 1,
+      contractNumber = "Г-0001",
+      stageAmount = BigDecimal("224"),
+      calculationDate = date("28.10.2026"),
+      reportPlannedSubmissionDate = date("02.03.2026"),
+      reportActualSubmissionDate = date("03.03.2026"),
+      grantReport = GrantReportDto(
+        cases = listOf(case),
+        reportApprovalDate = date("04.03.2026"),
+        daysToExclude = DaysToExcludeDto(),
+      ),
+      extraBudgetReport = ExtraBudgetReportDto(
+        cases = listOf(case),
+        reportApprovalDate = date("04.03.2026"),
+        daysToExclude = DaysToExcludeDto(),
+      ),
+      technicalReport = TechnicalReportDto(
+        cases = listOf(case),
+        reportApprovalDate = date("04.03.2026"),
+        plannedCompletionDate = date("02.03.2026"),
+        actualCompletionDate = date("03.03.2026"),
+        daysToExclude = DaysToExcludeDto(),
+      ),
+    )
+
+    val result = service.calculate(request)
+
+    assertEquals(1, result.reportingDelayPenalty.totalDaysForCalculation.size)
+    assertEquals(1, result.stageCompletionPenalty.overdueDays.size)
+    // Каждый раздел: 224 × 14 / 100 / 300 = 0.104533… → 0.10 рубля.
+    assertEquals(BigDecimal("0.10"), result.reportingDelayPenalty.penalty)
+    assertEquals(BigDecimal("0.10"), result.stageCompletionPenalty.penalty)
+    // Складываем округлённые суммы: 0.10 + 0.10 = 0.20, а не 0.21.
+    assertEquals(BigDecimal("0.20"), result.totalPenalty)
   }
 
   private fun request(): CalculatePenaltyRequestDto {
@@ -520,6 +553,4 @@ class PenaltyCalculationServiceTest : AbstractTest() {
   )
 
   private fun days(vararg values: String): List<LocalDate> = values.map(::date)
-
-  private fun date(value: String): LocalDate = LocalDate.parse(value, DATE_FORMATTER)
 }

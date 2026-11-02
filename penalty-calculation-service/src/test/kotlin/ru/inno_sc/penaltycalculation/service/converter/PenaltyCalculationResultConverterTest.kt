@@ -1,7 +1,6 @@
 package ru.inno_sc.penaltycalculation.service.converter
 
 import java.math.BigDecimal
-import java.time.LocalDate
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import ru.inno_sc.penaltycalculation.api.penalty.response.PenaltyCalculationResultDto
@@ -10,7 +9,7 @@ import ru.inno_sc.penaltycalculation.api.penalty.response.ReportRevisionDto
 import ru.inno_sc.penaltycalculation.api.penalty.response.ReportingDelayPenaltyDto
 import ru.inno_sc.penaltycalculation.api.penalty.response.StageCompletionPenaltyDto
 import ru.inno_sc.penaltycalculation.service.AbstractTest
-import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_FORMATTER
+import ru.inno_sc.penaltycalculation.service.AbstractTest.Companion.date
 import ru.inno_sc.penaltycalculation.service.domain.PenaltyCalculationResult
 import ru.inno_sc.penaltycalculation.service.domain.ReportRevision
 import ru.inno_sc.penaltycalculation.service.domain.ReportRevisionCase
@@ -132,6 +131,4 @@ class PenaltyCalculationResultConverterTest : AbstractTest() {
 
     assertEquals(expected, result.toDto())
   }
-
-  private fun date(value: String): LocalDate = LocalDate.parse(value, DATE_FORMATTER)
 }

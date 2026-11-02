@@ -1,7 +1,7 @@
 package ru.inno_sc.penaltycalculation.service.service
 
 import java.math.BigDecimal
-import java.math.RoundingMode.UP
+import java.math.RoundingMode.HALF_UP
 import java.time.Clock
 import java.time.LocalDate
 import ru.inno_sc.penaltycalculation.api.penalty.request.CalculatePenaltyRequestDto
@@ -126,7 +126,7 @@ class PenaltyCalculationService(
   }
 
   private fun calculatePenalty(stageAmount: BigDecimal, keyRatePercent: BigDecimal, daysCount: Int): BigDecimal =
-    stageAmount.multiply(keyRatePercent).multiply(BigDecimal.valueOf(daysCount.toLong())).divide(PENALTY_DIVISOR, MONEY_SCALE, UP)
+    stageAmount.multiply(keyRatePercent).multiply(BigDecimal.valueOf(daysCount.toLong())).divide(PENALTY_DIVISOR, MONEY_SCALE, HALF_UP)
 
   fun calculateStageCompletionPenalty(reports: CalculatePenaltyRequestDto): StageCompletionPenalty {
     val technicalReport = reports.technicalReport

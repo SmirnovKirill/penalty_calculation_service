@@ -22,6 +22,18 @@ const submit = document.querySelector('#submit-report');
 const result = document.querySelector('#result');
 const calculationResult = document.querySelector('#calculation-result');
 
+function showResult(message = '', error = false) {
+  result.textContent = message;
+  result.classList.toggle('error', error);
+  result.setAttribute('role', error ? 'alert' : 'status');
+}
+
+document.addEventListener('catalog-changed', ({ detail }) => {
+  calculationResult.hidden = true;
+  showResult();
+  if (detail === 'WORKDAY_CALENDAR') reportPanels.forEach(updatePanelPlannedDates);
+});
+
 calculationDate.value = today();
 new ResizeObserver(() => document.documentElement.style.setProperty('--actions-height', `${document.querySelector('.actions').offsetHeight}px`))
   .observe(document.querySelector('.actions'));
@@ -42,7 +54,7 @@ reportForm.addEventListener('input', ({ target }) => {
   if (!target.matches('input')) return;
   if (target === stageNumber) target.value = target.value.replace(/\D/g, '');
   if (target === contractNumber) target.value = target.value.replace(/\D/g, '').slice(0, 2);
-  if (target === stageAmount) formatAmount(target);
+  if (target === stageAmount) formatAmount(target, 17);
   if (target.matches('[data-date]')) {
     formatDate(target);
     if (target.matches('[data-form-field="returnedForRevisionDate"]')) {
@@ -67,6 +79,7 @@ function clearCaseRow(row) {
     input.setCustomValidity('');
   });
   const planned = row.querySelector('[data-form-field="plannedSubmissionDate"]');
+  planned.classList.remove('error');
   planned.textContent = plannedDateHint;
 }
 
@@ -155,7 +168,7 @@ reportForm.addEventListener('reset', event => {
     input.setCustomValidity('');
   });
   calculationDate.value = today();
-  result.textContent = '';
+  showResult();
   calculationResult.hidden = true;
   tabs[0].click();
   updateLongCaseWarnings();
@@ -197,11 +210,11 @@ async function updatePlannedDate(input) {
   const firstRowForCase = [...row.parentElement.rows]
     .find(candidate => Number(candidate.querySelector('[data-form-field="caseNumber"]').value) === caseNumber);
   const value = firstRowForCase?.querySelector('[data-form-field="returnedForRevisionDate"]').value;
+  cell.classList.remove('error');
   cell.textContent = plannedDateHint;
   updateLongCaseWarnings();
   if (!Number.isInteger(caseNumber) || caseNumber < 1 || !value || dateError(value)) return;
   cell.textContent = '…';
-  result.textContent = '';
   try {
     const params = new URLSearchParams({ caseNumber, returnedForRevisionDate: value });
     const response = await fetch(`/api/reports/revision-planned-date?${params}`);
@@ -210,8 +223,8 @@ async function updatePlannedDate(input) {
     cell.textContent = data.plannedSubmissionDate;
     updateLongCaseWarnings();
   } catch (error) {
-    cell.textContent = 'Ошибка';
-    result.textContent = error.message;
+    cell.textContent = error.message;
+    cell.classList.add('error');
   }
 }
 
@@ -233,16 +246,15 @@ reportForm.addEventListener('submit', async event => {
   const data = validatedRequest();
   if (!data) return;
   submit.disabled = true;
-  result.textContent = '';
   calculationResult.hidden = true;
   const loadingTime = showCalculationCat();
   try {
     const response = await postRequest('/api/reports/penalty-calculation', data);
     const calculation = await response.json();
     renderCalculation(calculation);
-    result.textContent = `Неустойка: ${calculation.totalPenalty}.`;
+    showResult(`Неустойка: ${calculation.totalPenalty}.`);
   } catch (error) {
-    result.textContent = error.message;
+    showResult(error.message, true);
   } finally {
     await loadingTime;
     hideCalculationCat();
@@ -251,6 +263,7 @@ reportForm.addEventListener('submit', async event => {
 });
 
 function validatedRequest() {
+  showResult();
   validateForm();
   const invalid = reportForm.querySelector('input:invalid');
   if (invalid) {
@@ -267,7 +280,7 @@ document.querySelector('#export-report').addEventListener('click', async event =
   if (!data) return;
   const button = event.currentTarget;
   button.disabled = true;
-  result.textContent = 'Готовим Excel…';
+  showResult('Готовим Excel…');
   try {
     const response = await postRequest('/api/reports/penalty-calculation/export', data);
     const url = URL.createObjectURL(await response.blob());
@@ -278,9 +291,9 @@ document.querySelector('#export-report').addEventListener('click', async event =
     link.download = encodedName ? decodeURIComponent(encodedName) : disposition.match(/filename="?([^";]+)"?/i)?.[1] || 'penalty_calculation.xlsx';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 0);
-    result.textContent = 'Файл XLSX подготовлен.';
+    showResult('Файл XLSX подготовлен.');
   } catch (error) {
-    result.textContent = error.message;
+    showResult(error.message, true);
   } finally {
     button.disabled = false;
   }

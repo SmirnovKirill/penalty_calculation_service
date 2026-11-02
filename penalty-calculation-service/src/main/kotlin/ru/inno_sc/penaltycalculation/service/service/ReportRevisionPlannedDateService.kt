@@ -2,13 +2,18 @@ package ru.inno_sc.penaltycalculation.service.service
 
 import java.time.Clock
 import java.time.LocalDate
+import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_FORMATTER
+import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.MAX_SUPPORTED_DATE
 import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.MIN_SUPPORTED_DATE
 
 class ReportRevisionPlannedDateService(private val workdayService: WorkdayService, private val clock: Clock) {
   fun getReportRevisionPlannedDate(returnedForRevisionDate: LocalDate, caseNumber: Int): LocalDate {
     require(caseNumber > 0) { "Номер кейса должен быть положительным." }
     require(!returnedForRevisionDate.isBefore(MIN_SUPPORTED_DATE)) {
-      "Дата возврата на доработку: дата не может быть раньше 01.01.2022."
+      "Дата возврата на доработку: дата не может быть раньше ${MIN_SUPPORTED_DATE.format(DATE_FORMATTER)}."
+    }
+    require(!returnedForRevisionDate.isAfter(MAX_SUPPORTED_DATE)) {
+      "Дата возврата на доработку: дата не может быть позже ${MAX_SUPPORTED_DATE.format(DATE_FORMATTER)}."
     }
     require(!returnedForRevisionDate.isAfter(LocalDate.now(clock))) {
       "Дата возврата на доработку: дата не может быть в будущем."

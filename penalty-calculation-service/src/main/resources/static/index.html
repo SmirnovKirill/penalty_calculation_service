@@ -7,11 +7,13 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="/report.css">
     <link rel="stylesheet" href="/cats/cats.css">
+    <link rel="stylesheet" href="/settings/settings.css">
     <script src="/form-validation.js" defer></script>
     <script src="/main.js" defer></script>
     <script src="/report-output.js" defer></script>
     <script src="/request-data.js" defer></script>
     <script src="/import-export.js" defer></script>
+    <script src="/settings/settings.js" type="module"></script>
     <script src="/cats/cats.js" defer></script>
   </head>
   <body>
@@ -269,7 +271,7 @@
           <h3 id="calculation-summary-heading">3. Итог</h3>
           <div class="calculation-summary">
             <p class="total-days">Всего дней просрочки: <span data-result-field="totalDaysForCalculation.length"></span>.</p>
-            <p>Формула каждого раздела: сумма этапа × ключевая ставка ЦБ / 100 × дни просрочки раздела / 300. Неустойка каждого раздела округляется вверх до копейки, затем суммы складываются.</p>
+            <p>Формула каждого раздела: сумма этапа × ключевая ставка ЦБ / 100 × дни просрочки раздела / 300. Неустойка каждого раздела округляется до копейки по математическим правилам, затем суммы складываются.</p>
             <p class="penalty-total">Итоговая неустойка: <span data-result-field="reportingDelayPenalty.penalty"></span> + <span data-result-field="stageCompletionPenalty.penalty"></span> = <span data-result-field="totalPenalty"></span></p>
           </div>
         </section>

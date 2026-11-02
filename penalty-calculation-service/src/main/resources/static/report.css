@@ -47,6 +47,7 @@ tbody tr { height: 56px; }
 .long-case-note { display: block; margin-top: 4px; color: #775000; font: 12px/1.4 Arial, sans-serif; }
 .long-case-note[hidden] { display: none; }
 input, button { box-sizing: border-box; font: inherit; color: inherit; }
+textarea { resize: none; }
 input { width: 100%; min-width: 0; padding: 7px 2px; border: 1px solid transparent; border-radius: 0; background: transparent; text-align: center; }
 input::placeholder { color: #465769; opacity: 1; }
 input:hover { border-color: #687e8b; }
@@ -66,8 +67,10 @@ button:disabled { opacity: .6; cursor: wait; }
 .actions { position: fixed; right: 0; bottom: 0; left: 0; z-index: 20; display: flex; align-items: flex-end; flex-wrap: wrap; gap: 12px; padding: 12px 24px; border-top: 1px solid var(--border); background: white; box-shadow: 0 -4px 16px #0001; }
 .calculation-date { display: grid; gap: 4px; width: 160px; }
 .calculation-date input { border-color: var(--border); background: var(--blue); }
-.actions output { flex: 1; min-width: 180px; align-self: center; }
+.actions output { flex: 1; min-width: 180px; }
 output { overflow-wrap: anywhere; }
+#result.error,
+[data-form-field="plannedSubmissionDate"].error { padding: 8px; border-left: 3px solid #b91c1c; background: #fff1f2; color: #b91c1c; font-weight: bold; }
 #calculation-result { margin-top: 28px; }
 #calculation-result h2 { margin: 0 0 12px; font-size: 20px; }
 #calculation-result h3 { margin: 0 0 12px; font-size: 17px; }

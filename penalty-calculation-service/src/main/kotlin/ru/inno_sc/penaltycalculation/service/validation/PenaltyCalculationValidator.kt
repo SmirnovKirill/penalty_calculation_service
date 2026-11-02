@@ -4,6 +4,8 @@ import java.time.LocalDate
 import ru.inno_sc.penaltycalculation.api.penalty.request.CalculatePenaltyRequestDto
 import ru.inno_sc.penaltycalculation.api.penalty.request.DaysToExcludeDto
 import ru.inno_sc.penaltycalculation.api.penalty.request.ReportCaseDto
+import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_FORMATTER
+import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.MAX_SUPPORTED_DATE
 import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.MIN_SUPPORTED_DATE
 
 class PenaltyCalculationValidator {
@@ -112,7 +114,12 @@ class PenaltyCalculationValidator {
   }
 
   private fun validateDate(date: LocalDate, label: String, calculationDate: LocalDate) {
-    require(!date.isBefore(MIN_SUPPORTED_DATE)) { "$label: дата не может быть раньше 01.01.2022." }
+    require(!date.isBefore(MIN_SUPPORTED_DATE)) {
+      "$label: дата не может быть раньше ${MIN_SUPPORTED_DATE.format(DATE_FORMATTER)}."
+    }
+    require(!date.isAfter(MAX_SUPPORTED_DATE)) {
+      "$label: дата не может быть позже ${MAX_SUPPORTED_DATE.format(DATE_FORMATTER)}."
+    }
     require(!date.isAfter(calculationDate)) { "$label: дата не может быть в будущем." }
   }
 

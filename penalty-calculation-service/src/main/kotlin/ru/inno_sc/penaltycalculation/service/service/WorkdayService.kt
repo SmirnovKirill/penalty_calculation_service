@@ -1,38 +1,33 @@
 package ru.inno_sc.penaltycalculation.service.service
 
 import java.time.LocalDate
-import ru.inno_sc.penaltycalculation.service.util.CsvUtils
+import ru.inno_sc.penaltycalculation.service.domain.catalog.CatalogType
+import ru.inno_sc.penaltycalculation.service.domain.catalog.WorkdayCalendarModel
+import ru.inno_sc.penaltycalculation.service.domain.exception.CatalogException
+import ru.inno_sc.penaltycalculation.service.domain.exception.CatalogValidationException
+import ru.inno_sc.penaltycalculation.service.service.catalog.CatalogService
 
-class WorkdayService {
-  private val calendars = CsvUtils.readResource("catalog/calendar.csv").associate { row ->
-    val year = row["year"].toInt()
-    year to CalendarOverrides(dates(year, row["daysOff"]), dates(year, row["workingDays"]))
-  }
-
-  fun isWorkday(date: LocalDate): Boolean {
-    val calendar = requireNotNull(calendars[date.year]) {
-      "Производственный календарь за ${date.year} год не загружен."
-    }
-    return date in calendar.workingDays || (date.dayOfWeek.value <= 5 && date !in calendar.daysOff)
-  }
+class WorkdayService(private val catalogs: CatalogService) {
+  fun isWorkday(date: LocalDate): Boolean = isWorkday(date, catalogs.model(CatalogType.WORKDAY_CALENDAR))
 
   fun addWorkdays(from: LocalDate, days: Int): LocalDate {
-    require(days >= 0) { "Количество рабочих дней не может быть отрицательным." }
-    require(from.year in calendars) { "Производственный календарь за ${from.year} год не загружен." }
+    if (days < 1) throw CatalogValidationException("Количество рабочих дней должно быть больше нуля.")
+    val calendar = catalogs.model<WorkdayCalendarModel>(CatalogType.WORKDAY_CALENDAR)
+    if (calendar.years.none { it.year == from.year }) {
+      throw CatalogException("Производственный календарь за ${from.year} год не загружен.")
+    }
     var date = from
     var remainingDays = days
     while (remainingDays > 0) {
       date = date.plusDays(1)
-      if (isWorkday(date)) remainingDays--
+      if (isWorkday(date, calendar)) remainingDays--
     }
     return date
   }
 
-  private fun dates(year: Int, value: String): Set<LocalDate> = value.split(' ')
-    .filter { it.isNotBlank() }.map {
-      val (day, month) = it.split('.')
-      LocalDate.of(year, month.toInt(), day.toInt())
-    }.toSet()
-
-  private data class CalendarOverrides(val daysOff: Set<LocalDate>, val workingDays: Set<LocalDate>)
+  private fun isWorkday(date: LocalDate, calendar: WorkdayCalendarModel): Boolean {
+    val year = calendar.years.find { it.year == date.year }
+      ?: throw CatalogException("Производственный календарь за ${date.year} год не загружен.")
+    return date in year.workingDays || (date.dayOfWeek.value <= 5 && date !in year.daysOff)
+  }
 }

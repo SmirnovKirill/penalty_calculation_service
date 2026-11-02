@@ -14,6 +14,7 @@ dependencies {
     implementation("tools.jackson.module:jackson-module-kotlin")
     implementation("org.apache.commons:commons-csv:1.14.1")
     implementation("org.apache.poi:poi-ooxml:6.0.0")
+    implementation("com.ibm.icu:icu4j:79.1")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -21,3 +22,7 @@ dependencies {
 
 tasks.test { useJUnitPlatform() }
 tasks.bootJar { archiveFileName.set("app.jar") }
+
+tasks.processResources {
+    from(rootProject.file("package.json")) { into("static/settings") }
+}

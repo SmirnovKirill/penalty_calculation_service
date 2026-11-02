@@ -1,0 +1,70 @@
+<button id="open-settings" type="button" aria-label="Настройки" title="Настройки">&#9881;&#65038;</button>
+<dialog id="settings-dialog" aria-labelledby="settings-heading">
+  <header class="settings-heading">
+    <h2 id="settings-heading">Настройки</h2>
+    <span>Версия <span id="settings-version">—</span></span>
+    <button id="close-settings" type="button" aria-label="Закрыть настройки">×</button>
+  </header>
+  <fieldset data-catalog="KEY_RATES" data-header="from;through;rate" disabled>
+    <legend>Ключевая ставка</legend>
+    <p data-source></p>
+    <details>
+      <summary>Периоды ставок</summary>
+      <p>Границы дат включаются. Следующий период должен начинаться на следующий день после предыдущего.</p>
+      <form novalidate>
+        <div class="settings-table-scroll"><table>
+          <thead><tr><th>№</th><th>С</th><th>По</th><th>Ставка, %</th><th></th></tr></thead><tbody></tbody>
+        </table></div>
+        <div class="settings-actions">
+          <button type="button" data-add>+ Период</button><button type="submit" disabled>Сохранить изменения</button>
+          <button type="button" data-cancel disabled>Отменить изменения</button>
+          <details class="settings-tools">
+            <summary>Ещё</summary>
+            <div class="settings-actions">
+              <button type="button" data-import>Импорт CSV</button><button type="button" data-export>Экспорт CSV</button><button type="button" data-reset>Вернуть встроенный</button>
+              <input type="file" accept=".csv,text/csv" hidden>
+            </div>
+          </details>
+        </div>
+      </form>
+    </details>
+    <output role="status"></output>
+    <template><tr>
+      <td class="row-number"></td>
+      <td><input data-date required pattern="\d{2}\.\d{2}\.\d{4}" maxlength="10" placeholder="дд.мм.гггг" aria-label="Начало периода"></td>
+      <td><input data-date required pattern="\d{2}\.\d{2}\.\d{4}" maxlength="10" placeholder="дд.мм.гггг" aria-label="Конец периода"></td>
+      <td><input data-rate required inputmode="decimal" aria-label="Ставка в процентах"></td><td><button type="button" data-remove>Удалить</button></td>
+    </tr></template>
+  </fieldset>
+  <fieldset data-catalog="WORKDAY_CALENDAR" data-header="year;daysOff;workingDays" disabled>
+    <legend>Календарь</legend>
+    <p data-source></p>
+    <details>
+      <summary>Выходные и рабочие дни по годам</summary>
+      <p>Годы идут подряд. Суббота и воскресенье — выходные по умолчанию. В списках — только праздники и переносы, даты через пробел: 01.01 02.01.</p>
+      <form novalidate>
+        <div class="settings-table-scroll"><table>
+          <thead><tr><th>№</th><th>Год</th><th>Дополнительные выходные</th><th>Дополнительные рабочие дни</th><th></th></tr></thead><tbody></tbody>
+        </table></div>
+        <div class="settings-actions">
+          <button type="button" data-add>+ Год</button><button type="submit" disabled>Сохранить изменения</button>
+          <button type="button" data-cancel disabled>Отменить изменения</button>
+          <details class="settings-tools">
+            <summary>Ещё</summary>
+            <div class="settings-actions">
+              <button type="button" data-import>Импорт CSV</button><button type="button" data-export>Экспорт CSV</button><button type="button" data-reset>Вернуть встроенный</button>
+              <input type="file" accept=".csv,text/csv" hidden>
+            </div>
+          </details>
+        </div>
+      </form>
+    </details>
+    <output role="status"></output>
+    <template><tr>
+      <td class="row-number"></td>
+      <td><input data-year inputmode="numeric" required aria-label="Год"></td>
+      <td><textarea rows="3" aria-label="Дополнительные выходные"></textarea></td>
+      <td><textarea rows="3" aria-label="Дополнительные рабочие дни"></textarea></td><td><button type="button" data-remove>Удалить</button></td>
+    </tr></template>
+  </fieldset>
+</dialog>

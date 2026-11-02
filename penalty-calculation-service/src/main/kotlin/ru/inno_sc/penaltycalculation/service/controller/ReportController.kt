@@ -19,9 +19,9 @@ import ru.inno_sc.penaltycalculation.api.reportrevision.ReportRevisionPlannedDat
 import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_FORMATTER
 import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_PATTERN
 import ru.inno_sc.penaltycalculation.service.converter.toDto
-import ru.inno_sc.penaltycalculation.service.service.PenaltyCalculationExcelService
 import ru.inno_sc.penaltycalculation.service.service.PenaltyCalculationService
 import ru.inno_sc.penaltycalculation.service.service.ReportRevisionPlannedDateService
+import ru.inno_sc.penaltycalculation.service.service.excel.PenaltyCalculationExcelService
 
 @RestController
 class ReportController(

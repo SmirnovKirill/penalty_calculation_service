@@ -1,6 +1,0 @@
-# CSV resource fixture
-name;description;optional
-
-first;"semi; ""quote""";
-# Comments between records are ignored too.
-second;plain;value

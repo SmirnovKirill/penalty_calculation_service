@@ -1,3 +1,6 @@
+const MIN_SUPPORTED_YEAR = 2022;
+const MAX_SUPPORTED_YEAR = 2050;
+
 function parseDate(value) {
   if (!/^\d{2}\.\d{2}\.\d{4}$/.test(value)) return null;
   const [day, month, year] = value.split('.').map(Number);
@@ -5,12 +8,13 @@ function parseDate(value) {
   return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day ? date : null;
 }
 
-function dateError(value, calculationDate = null) {
+function dateError(value, calculationDate = null, allowFuture = false) {
   if (!value) return 'Укажите дату.';
   const date = parseDate(value);
   if (!date) return 'Введите корректную дату в формате дд.мм.гггг.';
-  if (date < new Date(2022, 0, 1)) return 'Дата не может быть раньше 01.01.2022.';
-  if (date > new Date()) return 'Дата не может быть в будущем.';
+  if (date.getFullYear() < MIN_SUPPORTED_YEAR) return `Дата не может быть раньше 01.01.${MIN_SUPPORTED_YEAR}.`;
+  if (date.getFullYear() > MAX_SUPPORTED_YEAR) return `Дата не может быть позже 31.12.${MAX_SUPPORTED_YEAR}.`;
+  if (!allowFuture && date > new Date()) return 'Дата не может быть в будущем.';
   if (calculationDate && date > calculationDate) return 'Дата не может быть позже даты расчёта.';
   return '';
 }
@@ -40,13 +44,15 @@ function formatDate(input) {
   input.setSelectionRange(caret, caret);
 }
 
-function formatAmount(input) {
+function formatAmount(input, maxDigits = Infinity, groupThousands = true) {
   const value = input.value.replace(/[^\d.,]/g, '');
-  const [integer, decimals = ''] = value.split(/[.,]/);
-  const separator = value.match(/[.,]/)?.[0] ?? '';
+  let [integer, decimals = ''] = value.split(/[.,]/);
+  integer = integer.slice(0, maxDigits);
+  const separator = integer.length < maxDigits ? value.match(/[.,]/)?.[0] ?? '' : '';
   let remainingCharacters = input.value.slice(0, input.selectionStart).replace(/[^\d.,]/g, '').length;
 
-  input.value = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + separator + decimals.slice(0, 2);
+  input.value = (groupThousands ? integer.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : integer)
+    + separator + decimals.slice(0, Math.min(2, maxDigits - integer.length));
 
   // Восстанавливаем курсор, не учитывая добавленные пробелы.
   let caretPosition = 0;

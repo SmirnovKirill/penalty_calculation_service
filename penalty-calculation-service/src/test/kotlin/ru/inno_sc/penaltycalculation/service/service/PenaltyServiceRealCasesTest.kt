@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.bean.override.convention.TestBean
 import ru.inno_sc.penaltycalculation.api.penalty.request.CalculatePenaltyRequestDto
+import ru.inno_sc.penaltycalculation.service.AbstractTest.Companion.date
 import ru.inno_sc.penaltycalculation.service.Application
-import ru.inno_sc.penaltycalculation.service.config.CommonConfig.Companion.DATE_FORMATTER
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.databind.node.ObjectNode
 
@@ -98,12 +98,12 @@ class PenaltyServiceRealCasesTest {
       dateRange("23.12.2025", "10.01.2026"),
       result.stageCompletionPenalty.overdueDays
     )
-    assertEquals(BigDecimal("443333.34"), result.stageCompletionPenalty.penalty)
+    assertEquals(BigDecimal("443333.33"), result.stageCompletionPenalty.penalty)
     assertEquals(19, result.stageCompletionPenalty.overdueDays.size)
 
     // Итог
     assertEquals(42, result.totalDaysForCalculation.size)
-    assertEquals(BigDecimal("980000.01"), result.totalPenalty)
+    assertEquals(BigDecimal("980000.00"), result.totalPenalty)
   }
 
   @Test
@@ -489,7 +489,7 @@ class PenaltyServiceRealCasesTest {
       result.reportingDelayPenalty.totalDaysForCalculation
     )
     assertEquals(180, result.reportingDelayPenalty.totalDaysForCalculation.size)
-    assertEquals(BigDecimal("7930549.61"), result.reportingDelayPenalty.penalty)
+    assertEquals(BigDecimal("7930549.60"), result.reportingDelayPenalty.penalty)
 
     // 2. Неустойка по просрочке выполнения работ этапа
     assertEquals(
@@ -501,7 +501,7 @@ class PenaltyServiceRealCasesTest {
 
     // Итог
     assertEquals(383, result.totalDaysForCalculation.size)
-    assertEquals(BigDecimal("16874447.22"), result.totalPenalty)
+    assertEquals(BigDecimal("16874447.21"), result.totalPenalty)
   }
 
   private fun readRequest(fileName: String): CalculatePenaltyRequestDto {
@@ -513,10 +513,8 @@ class PenaltyServiceRealCasesTest {
 
   private fun dateRange(start: String, end: String): List<LocalDate> = date(start).datesUntil(date(end).plusDays(1)).toList()
 
-  private fun date(value: String): LocalDate = LocalDate.parse(value, DATE_FORMATTER)
-
   companion object {
     @JvmStatic
-    fun fixedClock(): Clock = Clock.fixed(LocalDate.parse("29.10.2026", DATE_FORMATTER).atTime(9, 0).toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
+    fun fixedClock(): Clock = Clock.fixed(date("29.10.2026").atTime(9, 0).toInstant(ZoneOffset.UTC), ZoneOffset.UTC)
   }
 }

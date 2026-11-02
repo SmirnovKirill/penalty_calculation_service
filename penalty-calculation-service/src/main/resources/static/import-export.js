@@ -15,13 +15,13 @@ requestDataFile.addEventListener('change', async () => {
     return;
   }
   setRequestFileBusy(true);
-  result.textContent = 'Загружаем исходные данные…';
+  showResult('Загружаем исходные данные…');
   try {
     const data = JSON.parse((await file.text()).replace(/^\uFEFF/, ''));
     fillRequestData(data);
-    result.textContent = 'Исходные данные загружены из файла.';
+    showResult('Исходные данные загружены из файла.');
   } catch (error) {
-    result.textContent = error instanceof SyntaxError ? `Ошибка JSON: ${error.message}` : error.message;
+    showResult(error instanceof SyntaxError ? `Ошибка JSON: ${error.message}` : error.message, true);
   } finally {
     requestDataFile.value = '';
     setRequestFileBusy(false);
@@ -31,16 +31,16 @@ requestDataFile.addEventListener('change', async () => {
 exportRequestData.addEventListener('click', () => {
   if (!requestFileAvailable()) return;
   setRequestFileBusy(true);
-  result.textContent = 'Готовим файл с исходными данными…';
+  showResult('Готовим файл с исходными данными…');
   try {
     const data = getRequestData();
     checkRequestData(data);
     requestDataDownload.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data, null, 2) + '\n');
     requestDataDownload.download = `${data.contractNumber}_№${data.stageNumber ?? ''}_${data.calculationDate}.json`;
     requestDataDownload.click();
-    result.textContent = 'Файл с исходными данными подготовлен.';
+    showResult('Файл с исходными данными подготовлен.');
   } catch (error) {
-    result.textContent = error.message;
+    showResult(error.message, true);
   } finally {
     setRequestFileBusy(false);
   }
@@ -48,7 +48,7 @@ exportRequestData.addEventListener('click', () => {
 
 function requestFileAvailable() {
   if (importRequestData.disabled || exportRequestData.disabled || submit.disabled || exportCalculation.disabled) {
-    result.textContent = 'Дождитесь завершения текущей операции.';
+    showResult('Дождитесь завершения текущей операции.');
     return false;
   }
   return true;
