@@ -2,7 +2,9 @@ package ru.inno_sc.penaltycalculation.service.service.excel
 
 import java.io.ByteArrayOutputStream
 import java.math.BigDecimal
+import java.math.RoundingMode.HALF_UP
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.CellStyle
 import org.apache.poi.ss.usermodel.DataValidation
@@ -38,7 +40,7 @@ class PenaltyCalculationExcelService {
     writeReportSheet(workbook, styles, "Грант", result.reportingDelayPenalty.grantReport, request.grantReport.reportApprovalDate)
     writeReportSheet(workbook, styles, "Внебюджет", result.reportingDelayPenalty.extraBudgetReport, request.extraBudgetReport.reportApprovalDate)
     writeReportSheet(workbook, styles, "Тех", result.reportingDelayPenalty.technicalReport, request.technicalReport.reportApprovalDate)
-    // writeAccountingSheet(workbook, request, result) todo restore
+    writeAccountingSheet(workbook, request, result)
 
     workbook.setActiveSheet(0)
     ByteArrayOutputStream().use { output ->
@@ -369,10 +371,20 @@ class PenaltyCalculationExcelService {
       request.extraBudgetReport.reportApprovalDate,
       request.technicalReport.reportApprovalDate
     )
+    val daysByReport = accountingDays(result)
     reports.forEachIndexed { index, report ->
       row(sheet, styles.reportName, "${index + 1}. ${names[index]}")
       reportTable(sheet, styles, request, report, approvals[index], result.reportingDelayPenalty.initialSubmissionDaysForCalculation.size)
-      reportSummary(sheet, styles, report, result.reportingDelayPenalty.initialSubmissionDaysForCalculation, index)
+      reportSummary(sheet, styles, report, result.reportingDelayPenalty.initialSubmissionDaysForCalculation, index, daysByReport)
+    }
+  }
+
+  // Костыль который делает расчет для бухгалтерии чтобы даты учитывались только 1 раз
+  private fun accountingDays(result: PenaltyCalculationResultDto): List<List<LocalDate>> {
+    val reporting = result.reportingDelayPenalty
+    val used = mutableSetOf<LocalDate>()
+    return listOf(reporting.grantReport, reporting.extraBudgetReport, reporting.technicalReport).map { report ->
+      (reporting.initialSubmissionDaysForCalculation + report.daysForCalculation).distinct().sorted().filter { used.add(it) }
     }
   }
 
@@ -382,7 +394,7 @@ class PenaltyCalculationExcelService {
     request: CalculatePenaltyRequestDto,
     report: ReportRevisionDto,
     approvalDate: LocalDate,
-    initialDays: Int,
+    initialSubmissionDaysForCalculation: Int,
   ) {
     row(
       sheet, styles.tableHeading,
@@ -397,7 +409,7 @@ class PenaltyCalculationExcelService {
       styles.date to request.reportPlannedSubmissionDate,
       styles.date to request.reportActualSubmissionDate,
       styles.table to "", styles.table to "", styles.table to "", styles.table to "",
-      styles.table to initialDays,
+      styles.table to initialSubmissionDaysForCalculation,
       styles.date to approvalDate
     )
     report.cases.forEach { case ->
@@ -409,15 +421,25 @@ class PenaltyCalculationExcelService {
         styles.date to LocalDate.parse(case.returnedForRevisionDate, DATE_FORMATTER),
         styles.date to LocalDate.parse(case.plannedSubmissionDate, DATE_FORMATTER),
         styles.date to LocalDate.parse(case.actualSubmissionDate, DATE_FORMATTER),
-        styles.table to case.overdueDays.size,
+        styles.table to case.daysForCalculation.size,
         styles.table to ""
       )
     }
   }
 
-  private fun reportSummary(sheet: Sheet, styles: AccountingStyles, report: ReportRevisionDto, initialDays: List<LocalDate>, index: Int) {
-    val overdue = (initialDays + report.overdueDays).distinct()
-    val included = (initialDays + report.daysForCalculation).distinct().sorted()
+  private fun reportSummary(
+    sheet: Sheet,
+    styles: AccountingStyles,
+    report: ReportRevisionDto,
+    initialDays: List<LocalDate>,
+    index: Int,
+    daysByReport: List<List<LocalDate>>,
+  ) {
+    val overdue = (initialDays + report.daysForCalculation).distinct()
+    val included = daysByReport[index]
+    val repeated = daysByReport.take(index).map { previous ->
+      (initialDays + report.daysForCalculation).distinct().sorted().filter { it in previous }
+    }
     row(sheet, styles.text)
     row(
       sheet,
@@ -429,7 +451,7 @@ class PenaltyCalculationExcelService {
       overdue.size,
       plural(overdue.size, "день", "дня", "дней")
     )
-    row(sheet, styles.text, reportDaysText(styles, included, index))
+    row(sheet, styles.text, reportDaysText(styles, included, index, repeated))
     row(sheet, styles.text)
   }
 
@@ -440,7 +462,7 @@ class PenaltyCalculationExcelService {
     else -> many
   }
 
-  private fun reportDaysText(styles: AccountingStyles, included: List<LocalDate>, index: Int): XSSFRichTextString {
+  private fun reportDaysText(styles: AccountingStyles, included: List<LocalDate>, index: Int, repeated: List<List<LocalDate>>): XSSFRichTextString {
     val dates = if (included.isEmpty()) "" else days(included)
     val spaces = if (index == 2) "  " else " "
     return XSSFRichTextString().apply {
@@ -455,16 +477,28 @@ class PenaltyCalculationExcelService {
       } else {
         append(" $dates. ", if (index == 2) styles.boldFont else styles.textFont)
       }
+      append(previousDaysText(repeated), styles.textFont)
     }
   }
 
-  private fun days(values: List<LocalDate>): String {
+  private fun previousDaysText(repeated: List<List<LocalDate>>): String = repeated.mapIndexed { index, dates ->
+    if (dates.isEmpty()) {
+      ""
+    } else {
+      "\n${days(dates, withCount = true).replaceFirstChar { it.uppercase() }} - " +
+        "эти дни учтены в пункте ${index + 1} настоящей бухгалтерской справки."
+    }
+  }.joinToString("")
+
+  private fun days(values: List<LocalDate>, withCount: Boolean = false): String {
     if (values.isEmpty()) return "нет"
     val result = mutableListOf<String>()
     var start = values.first()
     var end = start
     fun append() {
-      result += "с ${start.minusDays(1).format(DATE_FORMATTER)} по ${end.format(DATE_FORMATTER)}"
+      val period = "с ${start.minusDays(1).format(DATE_FORMATTER)} по ${end.format(DATE_FORMATTER)}"
+      val count = ChronoUnit.DAYS.between(start, end).toInt() + 1
+      result += if (withCount) "$period - $count ${plural(count, "день", "дня", "дней")}" else period
     }
     for (value in values.drop(1)) {
       if (value == end.plusDays(1)) {
@@ -488,23 +522,18 @@ class PenaltyCalculationExcelService {
     row(sheet, styles.heading, "Расчет размера неустойки")
     row(sheet, styles.text)
     writeAccountingCalculationHeader(sheet, styles, request)
-    val reports = listOf(
-      result.reportingDelayPenalty.grantReport,
-      result.reportingDelayPenalty.extraBudgetReport,
-      result.reportingDelayPenalty.technicalReport
-    )
     val rate = result.keyRatePercent.removeSuffix("%").replace(',', '.').toBigDecimal().movePointLeft(2)
-    reports.forEachIndexed { index, report ->
-      val count = (result.reportingDelayPenalty.initialSubmissionDaysForCalculation + report.daysForCalculation).distinct().size
-      calculationRow(sheet, styles, index + 1, count, request.stageAmount, rate)
+    val daysByReport = accountingDays(result)
+    daysByReport.forEachIndexed { index, days ->
+      calculationRow(sheet, styles, index + 1, days.size, request.stageAmount, rate)
     }
     styledRow(
       sheet,
       styles.totalText to "ИТОГО:  ",
-      styles.totalText to "",
+      styles.calculationHeading to result.reportingDelayPenalty.totalDaysForCalculation.size,
       styles.totalMoney to request.stageAmount,
       styles.totalPercent to rate,
-      styles.totalMoney to money(result.totalPenalty),
+      styles.totalMoney to money(result.reportingDelayPenalty.penalty),
       styles.totalMoney to ""
     )
     writeAccountingTotal(sheet, styles, result)
@@ -524,18 +553,22 @@ class PenaltyCalculationExcelService {
   }
 
   private fun calculationRow(sheet: Sheet, styles: AccountingStyles, number: Int, days: Int, amount: BigDecimal, rate: BigDecimal) {
-    // Отдельных сумм трёх отчётов в результате нет: последний столбец остаётся пустым.
     styledRow(
       sheet,
       styles.calculation to "$number.",
       styles.calculation to days,
       styles.money to amount,
       styles.percent to rate,
-      styles.money to "",
+      styles.money to referencePenalty(amount, rate, days),
       styles.money to ""
     )
     row(sheet, styles.calculation, *Array<Any>(6) { "" })
   }
+
+  // Справочный расчёт: округлённые суммы строк могут не сложиться в итог, как и у бухгалтерии.
+  // Корректный итог берём из основного расчёта, а не складываем эти строки.
+  private fun referencePenalty(amount: BigDecimal, rate: BigDecimal, days: Int): BigDecimal =
+    amount.multiply(rate).multiply(BigDecimal.valueOf(days.toLong())).divide(BigDecimal("300"), 2, HALF_UP)
 
   private fun money(value: String): BigDecimal = value.replace(Regex("[^0-9,.-]"), "").replace(',', '.').toBigDecimal()
 
@@ -549,13 +582,14 @@ class PenaltyCalculationExcelService {
       styles.text to "",
       styles.text to "",
       styles.text to "",
-      styles.outsideMoney to money(result.totalPenalty)
+      styles.outsideMoney to money(result.reportingDelayPenalty.penalty)
     )
-    row(sheet, styles.text, MoneyUtils.moneyInWords(money(result.totalPenalty)))
+    row(sheet, styles.text, MoneyUtils.moneyInWords(money(result.reportingDelayPenalty.penalty)))
     row(sheet, styles.text)
     row(sheet, styles.text, "Бухгалтер", "", "", "", "", "")
   }
 
+  // todo разобраться
   private fun mergeAccountingSheet(sheet: Sheet, result: PenaltyCalculationResultDto) {
     // Шапка документа. Диапазоны считаются от первой строки указанного блока.
     merge(sheet, 0, "A1:H1", "A2:H2", "A5:H5")

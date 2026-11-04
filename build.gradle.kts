@@ -25,6 +25,6 @@ subprojects {
 
 allprojects {
     group = "ru.inno_sc"
-    version = "0.1.10"
+    version = "0.1.11-alpha"
     repositories { mavenCentral() }
 }

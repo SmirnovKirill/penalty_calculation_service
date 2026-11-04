@@ -1,8 +1,8 @@
 {
   "name": "penalty-calculation-service",
   "productName": "Расчет неустойки по этапу",
-  "version": "0.1.10",
-  "releaseDate": "04.11.2026",
+  "version": "0.1.11-alpha",
+  "releaseDate": "05.11.2026",
   "private": true,
   "description": "Расчет неустойки по этапу",
   "author": "АНО «Центр поддержки инжиниринга и инноваций»",
